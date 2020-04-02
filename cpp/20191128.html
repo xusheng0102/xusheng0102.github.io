@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Jump Game(Leetcode 55) | Hello World</title>
+    <meta name="description" content="Just playing around">
+    
+    
+    <link rel="preload" href="/assets/css/0.styles.9854472c.css" as="style"><link rel="preload" href="/assets/js/app.e432c74b.js" as="script"><link rel="preload" href="/assets/js/8.cf8b35d6.js" as="script"><link rel="prefetch" href="/assets/js/10.a6310021.js"><link rel="prefetch" href="/assets/js/11.89abd496.js"><link rel="prefetch" href="/assets/js/12.aa81b732.js"><link rel="prefetch" href="/assets/js/13.401d7d87.js"><link rel="prefetch" href="/assets/js/14.055e8dc8.js"><link rel="prefetch" href="/assets/js/15.d2901550.js"><link rel="prefetch" href="/assets/js/16.925c119a.js"><link rel="prefetch" href="/assets/js/17.bdbe99dd.js"><link rel="prefetch" href="/assets/js/18.d8ebf991.js"><link rel="prefetch" href="/assets/js/19.84cd183d.js"><link rel="prefetch" href="/assets/js/2.d8f505d4.js"><link rel="prefetch" href="/assets/js/20.2cd015ae.js"><link rel="prefetch" href="/assets/js/21.ee231b8e.js"><link rel="prefetch" href="/assets/js/22.99f8b366.js"><link rel="prefetch" href="/assets/js/23.74a25d05.js"><link rel="prefetch" href="/assets/js/24.0c3122b9.js"><link rel="prefetch" href="/assets/js/25.6144d366.js"><link rel="prefetch" href="/assets/js/26.0c3ae498.js"><link rel="prefetch" href="/assets/js/27.7c7167dc.js"><link rel="prefetch" href="/assets/js/28.ca917e75.js"><link rel="prefetch" href="/assets/js/3.856bffab.js"><link rel="prefetch" href="/assets/js/4.84fd4817.js"><link rel="prefetch" href="/assets/js/5.15a5e28a.js"><link rel="prefetch" href="/assets/js/6.b843420e.js"><link rel="prefetch" href="/assets/js/7.7d8fd547.js"><link rel="prefetch" href="/assets/js/9.8c899143.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.9854472c.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><!----> <span class="site-name">Hello World</span></a> <div class="links" style="max-width:nullpx;"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/" class="nav-link">Home</a></div><div class="nav-item"><a href="/python/" class="nav-link">Python</a></div><div class="nav-item"><a href="/cpp/" class="nav-link router-link-active">C++</a></div><div class="nav-item"><a href="/javaScript/" class="nav-link">JavaScript</a></div><div class="nav-item"><a href="/other/" class="nav-link">Other</a></div><div class="nav-item"><a href="/android/" class="nav-link">Android</a></div><div class="nav-item"><a href="https://github.com/xusheng0102" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Github
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <div class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/" class="nav-link">Home</a></div><div class="nav-item"><a href="/python/" class="nav-link">Python</a></div><div class="nav-item"><a href="/cpp/" class="nav-link router-link-active">C++</a></div><div class="nav-item"><a href="/javaScript/" class="nav-link">JavaScript</a></div><div class="nav-item"><a href="/other/" class="nav-link">Other</a></div><div class="nav-item"><a href="/android/" class="nav-link">Android</a></div><div class="nav-item"><a href="https://github.com/xusheng0102" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Github
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/cpp/" class="sidebar-link">hehe</a></li><li><a href="/cpp/test.html" class="sidebar-link">boost</a></li><li><a href="/cpp/20191114.html" class="sidebar-link">mediasoup_demo</a></li><li><a href="/cpp/20191128.html" class="active sidebar-link">Jump Game(Leetcode 55)</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/cpp/20191128.html#尝试用递归recursion" class="sidebar-link">尝试用递归recursion</a></li><li class="sidebar-sub-header"><a href="/cpp/20191128.html#贪心greedy" class="sidebar-link">贪心greedy</a></li></ul></li><li><a href="/cpp/20191129.html" class="sidebar-link">Jump Game II(letcode 45)</a></li></ul> </div> <div class="page"> <div class="content"><h1 id="jump-game-leetcode-55"><a href="#jump-game-leetcode-55" aria-hidden="true" class="header-anchor">#</a> Jump Game(Leetcode 55)</h1> <div class="language- extra-class"><pre class="language-text"><code>Category	Difficulty	Likes	Dislikes
+algorithms	Medium (31.45%)	2645	251
+Tags
+array | greedy
+
+Companies
+microsoft
+
+Given an array of non-negative integers, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Determine if you are able to reach the last index.
+
+Example 1:
+
+Input: [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+Example 2:
+
+Input: [3,2,1,0,4]
+Output: false
+Explanation: You will always arrive at index 3 no matter what. Its maximum
+             jump length is 0, which makes it impossible to reach the last index.
+</code></pre></div><h2 id="尝试用递归recursion"><a href="#尝试用递归recursion" aria-hidden="true" class="header-anchor">#</a> 尝试用递归recursion</h2> <ol><li>思路</li></ol> <div class="language- extra-class"><pre class="language-text"><code>当 当前未知的值和下标的和大于vector大小的时候，一定到达；
+其他情况， 遍历后续数据，找到可以作为下个开头的起始位置，条件下标和值的和大于起始值；
+向量丢弃无用数据，复制新的开头到最后的vector数据
+循环终止条件，递归返回值为true
+</code></pre></div><ol start="2"><li>代码</li></ol> <div class="language-cpp extra-class"><pre class="language-cpp"><code><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">bool</span> <span class="token function">canJump</span><span class="token punctuation">(</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+      <span class="token keyword">int</span> cur <span class="token operator">=</span> nums<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>cur <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+      <span class="token keyword">int</span> size <span class="token operator">=</span> nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+      cout<span class="token operator">&lt;&lt;</span> <span class="token string">&quot;size:&quot;</span><span class="token operator">&lt;&lt;</span>size<span class="token operator">&lt;&lt;</span> <span class="token string">&quot; cur:&quot;</span><span class="token operator">&lt;&lt;</span>cur<span class="token operator">&lt;&lt;</span>endl<span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span>  <span class="token operator">&gt;=</span> nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">else</span><span class="token punctuation">{</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> j<span class="token operator">&lt;=</span> nums<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token operator">+</span>j <span class="token operator">&lt;=</span> nums<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">continue</span><span class="token punctuation">;</span>
+           nums<span class="token punctuation">.</span><span class="token function">erase</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>j<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">canJump</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div><h2 id="贪心greedy"><a href="#贪心greedy" aria-hidden="true" class="header-anchor">#</a> 贪心greedy</h2> <ol><li>思路</li></ol> <div class="language- extra-class"><pre class="language-text"><code>小区间遍历
+三个下标， headIndex， curIndex, endIndex
+到达条件 endIndex + 1 &gt; size
+</code></pre></div><ol start="2"><li>代码</li></ol> <div class="language-cpp extra-class"><pre class="language-cpp"><code><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">bool</span> <span class="token function">canJump</span><span class="token punctuation">(</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">int</span> size <span class="token operator">=</span> nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+      <span class="token keyword">int</span> curIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> 
+      <span class="token keyword">int</span> headIndex <span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+      <span class="token keyword">int</span> EndIndex <span class="token operator">=</span> headIndex <span class="token operator">+</span> nums<span class="token punctuation">[</span>headIndex<span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>EndIndex <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>EndIndex <span class="token operator">+</span> <span class="token number">1</span><span class="token operator">&gt;=</span> size<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+      <span class="token keyword">for</span><span class="token punctuation">(</span>curIndex<span class="token punctuation">;</span>curIndex<span class="token operator">&lt;=</span>EndIndex<span class="token punctuation">;</span>curIndex<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>curIndex <span class="token operator">+</span> <span class="token punctuation">(</span>nums<span class="token punctuation">[</span>curIndex<span class="token punctuation">]</span> <span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token punctuation">(</span>headIndex <span class="token operator">+</span> nums<span class="token punctuation">[</span>headIndex<span class="token punctuation">]</span> <span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+          headIndex <span class="token operator">=</span> curIndex<span class="token punctuation">;</span>
+          EndIndex <span class="token operator">=</span> headIndex <span class="token operator">+</span> nums<span class="token punctuation">[</span>headIndex<span class="token punctuation">]</span><span class="token punctuation">;</span>
+          <span class="token keyword">if</span><span class="token punctuation">(</span>EndIndex <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">&gt;=</span> size<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span> 
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+      <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div></div> <div class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated: </span> <span class="time">11/29/2019, 4:18:07 PM</span></div></div> <div class="page-nav"><p class="inner"><span class="prev">
+        ←
+        <a href="/cpp/20191114.html" class="prev">
+          mediasoup_demo
+        </a></span> <span class="next"><a href="/cpp/20191129.html">
+          Jump Game II(letcode 45)
+        </a>
+        →
+      </span></p></div> </div> <!----></div></div>
+    <script src="/assets/js/app.e432c74b.js" defer></script><script src="/assets/js/8.cf8b35d6.js" defer></script>
+  </body>
+</html>
