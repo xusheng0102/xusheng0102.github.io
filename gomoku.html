@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gomoku - 五子棋</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0b;
+  --bg-card: #141416;
+  --bg-card-hover: #1a1a1f;
+  --border: #2a2a30;
+  --text: #e4e4e7;
+  --text-dim: #a1a1aa;
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --gradient: linear-gradient(135deg, #6366f1, #a855f7);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius: 12px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+a { color: var(--accent-light); text-decoration: none; }
+
+/* ── Header ── */
+.header {
+  width: 100%; padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.header .back { font-size: 0.9rem; color: var(--text-dim); }
+.header .back:hover { color: var(--text); }
+.header h1 {
+  font-size: 1.2rem; font-weight: 700;
+  background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* ── Lobby ── */
+.lobby {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; padding: 60px 24px; width: 100%; max-width: 600px;
+}
+.lobby h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
+.lobby .desc { color: var(--text-dim); margin-bottom: 40px; text-align: center; }
+.lobby-btns { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 360px; }
+
+.btn {
+  padding: 14px 28px; border-radius: var(--radius); font-weight: 600; font-size: 1rem;
+  border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+  cursor: pointer; transition: var(--transition); text-align: center;
+}
+.btn:hover { border-color: var(--accent); background: var(--bg-card-hover); transform: translateY(-2px); }
+.btn.primary { background: var(--gradient); color: #fff; border: none; }
+.btn.primary:hover { box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
+
+.join-row { display: flex; gap: 12px; }
+.join-row input {
+  flex: 1; padding: 14px 20px; border-radius: var(--radius); font-size: 1rem;
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+  outline: none; font-family: var(--font); letter-spacing: 2px; text-align: center;
+}
+.join-row input:focus { border-color: var(--accent); }
+.join-row input::placeholder { letter-spacing: normal; color: var(--text-dim); }
+
+/* ── Game Screen ── */
+.game-screen { display: none; flex-direction: column; align-items: center; padding: 20px 16px; width: 100%; flex: 1; }
+.game-screen.active { display: flex; }
+
+/* Status Bar */
+.status-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 560px; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+}
+.player-info {
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--bg-card); font-size: 0.9rem; transition: var(--transition);
+}
+.player-info.active { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.stone-icon {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.stone-icon.black { background: radial-gradient(circle at 35% 35%, #555, #111); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.stone-icon.white { background: radial-gradient(circle at 35% 35%, #fff, #bbb); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+.room-code {
+  font-size: 0.8rem; color: var(--text-dim); padding: 6px 14px;
+  border-radius: 999px; background: var(--bg-card); border: 1px solid var(--border);
+  cursor: pointer; transition: var(--transition);
+}
+.room-code:hover { border-color: var(--accent); color: var(--accent-light); }
+
+/* Board */
+.board-wrapper {
+  position: relative; margin-bottom: 20px;
+  background: #c8a862; border-radius: var(--radius); padding: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+canvas#board { display: block; cursor: pointer; touch-action: none; }
+
+/* Controls */
+.controls { display: flex; gap: 12px; margin-bottom: 16px; }
+.controls .btn { padding: 10px 20px; font-size: 0.85rem; }
+
+/* Status text */
+.game-status {
+  font-size: 1rem; font-weight: 600; min-height: 1.5em; text-align: center;
+  color: var(--accent-light);
+}
+
+/* ── Overlay ── */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,10,11,0.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+.overlay.active { display: flex; }
+.overlay-content {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 48px; text-align: center; max-width: 400px; width: 90%;
+  animation: popIn 0.3s ease;
+}
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.overlay-content h2 { font-size: 1.8rem; margin-bottom: 8px; }
+.overlay-content p { color: var(--text-dim); margin-bottom: 28px; }
+.overlay-content .btns { display: flex; gap: 12px; justify-content: center; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .status-bar { flex-direction: column; align-items: stretch; }
+  .player-info { justify-content: center; }
+  .room-code { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back">&larr; Home</a>
+  <h1>Gomoku</h1>
+  <span style="width:48px"></span>
+</div>
+
+<!-- Lobby -->
+<div class="lobby" id="lobby">
+  <h2>五子棋</h2>
+  <p class="desc">Choose a mode to start playing</p>
+  <div class="lobby-btns">
+    <button class="btn primary" onclick="startLocal()">Local Play (同设备对战)</button>
+    <button class="btn" onclick="showCreateRoom()">Create Room (创建房间)</button>
+    <div class="join-row">
+      <input id="roomInput" type="text" placeholder="Enter Room Code" maxlength="4" autocomplete="off">
+      <button class="btn" onclick="joinRoom()">Join</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Screen -->
+<div class="game-screen" id="gameScreen">
+  <div class="status-bar">
+    <div class="player-info active" id="blackInfo">
+      <span class="stone-icon black"></span>
+      <span id="blackName">Black</span>
+    </div>
+    <div class="room-code" id="roomCode" style="display:none" onclick="copyRoomCode()" title="Click to copy"></div>
+    <div class="player-info" id="whiteInfo">
+      <span class="stone-icon white"></span>
+      <span id="whiteName">White</span>
+    </div>
+  </div>
+  <div class="board-wrapper">
+    <canvas id="board"></canvas>
+  </div>
+  <div class="game-status" id="gameStatus">Black's turn</div>
+  <div class="controls">
+    <button class="btn" onclick="restartGame()">Restart</button>
+    <button class="btn" onclick="backToLobby()">Back to Lobby</button>
+  </div>
+</div>
+
+<!-- Win Overlay -->
+<div class="overlay" id="winOverlay">
+  <div class="overlay-content">
+    <h2 id="winTitle">Black Wins!</h2>
+    <p id="winDesc">Five in a row!</p>
+    <div class="btns">
+      <button class="btn primary" onclick="restartGame();closeOverlay()">Play Again</button>
+      <button class="btn" onclick="backToLobby();closeOverlay()">Lobby</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const SIZE = 15;
+const CELL = 34;
+const PAD = 24;
+const STONE_R = 13;
+
+let board = [];
+let turn = 1; // 1=black, 2=white
+let gameOver = false;
+let mode = ''; // 'local' | 'host' | 'guest'
+let myColor = 1;
+let lastMove = null;
+let peer = null;
+let conn = null;
+let myPeerId = '';
+
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+canvas.width = CELL * (SIZE - 1) + PAD * 2;
+canvas.height = canvas.width;
+
+function initBoard() {
+  board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+  turn = 1;
+  gameOver = false;
+  lastMove = null;
+  updateStatus();
+  drawBoard();
+}
+
+function drawBoard() {
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#c8a862';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = '#5a4320';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < SIZE; i++) {
+    const pos = PAD + i * CELL;
+    ctx.beginPath(); ctx.moveTo(PAD, pos); ctx.lineTo(PAD + (SIZE - 1) * CELL, pos); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pos, PAD); ctx.lineTo(pos, PAD + (SIZE - 1) * CELL); ctx.stroke();
+  }
+
+  const stars = SIZE === 15 ? [[3,3],[3,11],[7,7],[11,3],[11,11],[3,7],[7,3],[7,11],[11,7]] : [[3,3],[3,9],[6,6],[9,3],[9,9]];
+  ctx.fillStyle = '#5a4320';
+  for (const [r, c] of stars) {
+    ctx.beginPath();
+    ctx.arc(PAD + c * CELL, PAD + r * CELL, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (board[r][c]) {
+        drawStone(r, c, board[r][c]);
+      }
+    }
+  }
+
+  if (lastMove) {
+    const [lr, lc] = lastMove;
+    const x = PAD + lc * CELL, y = PAD + lr * CELL;
+    ctx.strokeStyle = board[lr][lc] === 1 ? '#fff' : '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawStone(r, c, color) {
+  const x = PAD + c * CELL, y = PAD + r * CELL;
+  const grad = ctx.createRadialGradient(x - 3, y - 3, 2, x, y, STONE_R);
+  if (color === 1) {
+    grad.addColorStop(0, '#666');
+    grad.addColorStop(1, '#111');
+  } else {
+    grad.addColorStop(0, '#fff');
+    grad.addColorStop(1, '#bbb');
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, STONE_R, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = color === 1 ? '#000' : '#999';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  let clientX, clientY;
+  if (e.touches) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  const mx = (clientX - rect.left) * scaleX;
+  const my = (clientY - rect.top) * scaleY;
+  const c = Math.round((mx - PAD) / CELL);
+  const r = Math.round((my - PAD) / CELL);
+  if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return null;
+  const dx = mx - (PAD + c * CELL);
+  const dy = my - (PAD + r * CELL);
+  if (dx * dx + dy * dy > (CELL / 2) * (CELL / 2)) return null;
+  return [r, c];
+}
+
+function placeStone(r, c, color) {
+  if (board[r][c] || gameOver) return false;
+  board[r][c] = color;
+  lastMove = [r, c];
+  drawBoard();
+
+  if (checkWin(r, c, color)) {
+    gameOver = true;
+    setTimeout(() => showWin(color), 300);
+    return true;
+  }
+  if (board.flat().every(v => v !== 0)) {
+    gameOver = true;
+    setTimeout(() => showDraw(), 300);
+    return true;
+  }
+  turn = turn === 1 ? 2 : 1;
+  updateStatus();
+  return true;
+}
+
+function handleClick(e) {
+  if (gameOver) return;
+  if (mode === 'guest' && turn !== myColor) return;
+
+  const pos = getPos(e);
+  if (!pos) return;
+  const [r, c] = pos;
+  if (board[r][c]) return;
+
+  if (mode === 'local') {
+    placeStone(r, c, turn);
+  } else if (mode === 'host') {
+    if (turn === myColor) {
+      if (placeStone(r, c, myColor)) {
+        conn.send({ type: 'move', r, c, color: myColor });
+      }
+    }
+  } else if (mode === 'guest') {
+    if (turn === myColor) {
+      if (placeStone(r, c, myColor)) {
+        conn.send({ type: 'move', r, c, color: myColor });
+      }
+    }
+  }
+}
+
+canvas.addEventListener('click', handleClick);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleClick(e); }, { passive: false });
+
+// ── Win Detection ──
+function checkWin(r, c, color) {
+  const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+  for (const [dr, dc] of dirs) {
+    let count = 1;
+    for (let d = 1; d < 5; d++) {
+      const nr = r + dr * d, nc = c + dc * d;
+      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && board[nr][nc] === color) count++;
+      else break;
+    }
+    for (let d = 1; d < 5; d++) {
+      const nr = r - dr * d, nc = c - dc * d;
+      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && board[nr][nc] === color) count++;
+      else break;
+    }
+    if (count >= 5) return true;
+  }
+  return false;
+}
+
+// ── UI Helpers ──
+function updateStatus() {
+  const s = document.getElementById('gameStatus');
+  const bInfo = document.getElementById('blackInfo');
+  const wInfo = document.getElementById('whiteInfo');
+  bInfo.classList.toggle('active', turn === 1);
+  wInfo.classList.toggle('active', turn === 2);
+
+  if (gameOver) return;
+  if (mode === 'guest' && turn !== myColor) {
+    s.textContent = "Opponent's turn...";
+  } else {
+    s.textContent = (turn === 1 ? "Black" : "White") + "'s turn";
+  }
+}
+
+function showWin(color) {
+  const name = color === 1 ? 'Black' : 'White';
+  document.getElementById('winTitle').textContent = name + ' Wins!';
+  document.getElementById('winDesc').textContent = 'Five in a row!';
+  document.getElementById('winOverlay').classList.add('active');
+}
+
+function showDraw() {
+  document.getElementById('winTitle').textContent = 'Draw!';
+  document.getElementById('winDesc').textContent = 'Board is full.';
+  document.getElementById('winOverlay').classList.add('active');
+}
+
+function closeOverlay() {
+  document.getElementById('winOverlay').classList.remove('active');
+}
+
+// ── Lobby Actions ──
+function showGame() {
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('gameScreen').classList.add('active');
+}
+
+function startLocal() {
+  mode = 'local';
+  myColor = 1;
+  document.getElementById('blackName').textContent = 'Player 1';
+  document.getElementById('whiteName').textContent = 'Player 2';
+  document.getElementById('roomCode').style.display = 'none';
+  showGame();
+  initBoard();
+}
+
+function showCreateRoom() {
+  mode = 'host';
+  myColor = 1;
+  document.getElementById('blackName').textContent = 'You (Host)';
+  document.getElementById('whiteName').textContent = 'Waiting...';
+
+  peer = new Peer();
+  peer.on('open', (id) => {
+    myPeerId = id;
+    const shortCode = id.slice(-4).toUpperCase();
+    document.getElementById('roomCode').textContent = 'Room: ' + shortCode;
+    document.getElementById('roomCode').style.display = 'block';
+    showGame();
+    initBoard();
+    document.getElementById('gameStatus').textContent = 'Waiting for opponent...';
+  });
+
+  peer.on('connection', (connection) => {
+    conn = connection;
+    conn.on('open', () => {
+      document.getElementById('whiteName').textContent = 'Opponent';
+      document.getElementById('gameStatus').textContent = "Black's turn";
+    });
+    conn.on('data', handleData);
+    conn.on('close', () => {
+      document.getElementById('gameStatus').textContent = 'Opponent disconnected';
+      gameOver = true;
+    });
+  });
+
+  peer.on('error', (err) => {
+    console.error('PeerJS error:', err);
+    alert('Connection error: ' + err.type);
+  });
+}
+
+function joinRoom() {
+  const input = document.getElementById('roomInput');
+  const code = input.value.trim().toUpperCase();
+  if (!code || code.length < 4) {
+    input.style.borderColor = '#ef4444';
+    setTimeout(() => input.style.borderColor = '', 1500);
+    return;
+  }
+
+  mode = 'guest';
+  myColor = 2;
+  document.getElementById('blackName').textContent = 'Opponent';
+  document.getElementById('whiteName').textContent = 'You';
+  document.getElementById('roomCode').style.display = 'none';
+
+  peer = new Peer();
+  peer.on('open', () => {
+    conn = peer.connect(code, { reliable: true });
+    conn.on('open', () => {
+      showGame();
+      initBoard();
+      document.getElementById('gameStatus').textContent = "Black's turn";
+    });
+    conn.on('data', handleData);
+    conn.on('close', () => {
+      document.getElementById('gameStatus').textContent = 'Opponent disconnected';
+      gameOver = true;
+    });
+  });
+
+  peer.on('error', (err) => {
+    console.error('PeerJS error:', err);
+    alert('Cannot connect to room. Check the code and try again.');
+  });
+}
+
+function handleData(data) {
+  if (data.type === 'move') {
+    placeStone(data.r, data.c, data.color);
+  } else if (data.type === 'restart') {
+    initBoard();
+  }
+}
+
+function copyRoomCode() {
+  if (myPeerId) {
+    navigator.clipboard.writeText(myPeerId).then(() => {
+      const el = document.getElementById('roomCode');
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      setTimeout(() => el.textContent = 'Room: ' + myPeerId.slice(-4).toUpperCase(), 1200);
+    });
+  }
+}
+
+// ── Restart & Back ──
+function restartGame() {
+  initBoard();
+  closeOverlay();
+  if (conn && conn.open) {
+    conn.send({ type: 'restart' });
+  }
+}
+
+function backToLobby() {
+  closeOverlay();
+  if (conn) { conn.close(); conn = null; }
+  if (peer) { peer.destroy(); peer = null; }
+  document.getElementById('lobby').style.display = 'flex';
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('roomInput').value = '';
+}
+</script>
+</body>
+</html>
