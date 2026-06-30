@@ -201,12 +201,36 @@ footer {
   border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.85rem;
 }
 
+/* ── Mobile Nav ── */
+.nav-toggle { display: none; background: none; border: none; color: var(--text); cursor: pointer; padding: 8px; }
+.nav-toggle svg { width: 24px; height: 24px; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  nav ul { display: none; }
+  .nav-toggle { display: block; }
+  nav ul {
+    display: none; position: absolute; top: 64px; left: 0; right: 0;
+    background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border); flex-direction: column;
+    padding: 16px 24px; gap: 0;
+  }
+  nav ul.open { display: flex; }
+  nav ul li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  nav ul li:last-child { border-bottom: none; }
+  nav ul a { font-size: 1rem; }
   .about-grid { grid-template-columns: 1fr; }
-  .about-avatar { max-width: 280px; margin: 0 auto; }
-  section { padding: 60px 0; }
+  .about-avatar { max-width: 240px; margin: 0 auto; }
+  .about-stats { gap: 24px; }
+  .stat-item .stat-num { font-size: 1.5rem; }
+  section { padding: 50px 0; }
+  .section-heading { margin-bottom: 32px; }
+  .skills-grid { grid-template-columns: 1fr; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .blog-grid { grid-template-columns: 1fr; }
+  .hero h1 { margin-bottom: 12px; }
+  .hero .subtitle { margin-bottom: 24px; }
+  .social-links { flex-direction: column; align-items: center; }
+  .social-link { width: 100%; max-width: 280px; justify-content: center; }
 }
 
 /* ── Fade-in animation ── */
@@ -223,6 +247,9 @@ footer {
 <nav>
   <div class="nav-inner">
     <div class="logo">YN.</div>
+    <button class="nav-toggle" onclick="document.querySelector('nav ul').classList.toggle('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <ul>
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
@@ -496,6 +523,11 @@ const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Close mobile nav on link click
+document.querySelectorAll('nav ul a').forEach(a => {
+  a.addEventListener('click', () => document.querySelector('nav ul').classList.remove('open'));
+});
 </script>
 </body>
 </html>
