@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Chinese Chess - 中国象棋</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0b; --bg-card: #141416; --border: #2a2a30;
+  --text: #e4e4e7; --text-dim: #a1a1aa;
+  --accent: #6366f1; --accent-light: #818cf8; --accent-glow: rgba(99,102,241,0.15);
+  --gradient: linear-gradient(135deg, #6366f1, #a855f7);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius: 12px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html, body { height: 100%; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+a { color: var(--accent-light); text-decoration: none; }
+.header { width: 100%; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.header .back { font-size: 0.9rem; color: var(--text-dim); }
+.header h1 { font-size: 1.1rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 40px 20px; width: 100%; max-width: 500px; }
+.lobby h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; text-align: center; }
+.lobby .desc { color: var(--text-dim); margin-bottom: 32px; text-align: center; font-size: 0.95rem; }
+.lobby-btns { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 340px; }
+.btn { padding: 16px 24px; border-radius: var(--radius); font-weight: 600; font-size: 1rem; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); cursor: pointer; transition: var(--transition); text-align: center; -webkit-tap-highlight-color: transparent; min-height: 52px; }
+.btn:hover { border-color: var(--accent); background: #1a1a1f; transform: translateY(-2px); }
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--gradient); color: #fff; border: none; }
+.btn.primary:hover { box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
+.join-row { display: flex; gap: 10px; }
+.join-row input { flex: 1; padding: 16px; border-radius: var(--radius); font-size: 1rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); outline: none; font-family: var(--font); letter-spacing: 3px; text-align: center; min-height: 52px; text-transform: uppercase; }
+.join-row input:focus { border-color: var(--accent); }
+.join-row input::placeholder { letter-spacing: normal; color: var(--text-dim); }
+.game-screen { display: none; flex-direction: column; align-items: center; padding: 10px 8px; width: 100%; flex: 1; justify-content: center; }
+.game-screen.active { display: flex; }
+.status-bar { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 8px; gap: 8px; }
+.player-info { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-card); font-size: 0.85rem; transition: var(--transition); min-height: 36px; }
+.player-info.active { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+.stone-icon { width: 16px; height: 16px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 2px solid; }
+.stone-icon.red { border-color: #cc0000; background: #cc0000; }
+.stone-icon.black { border-color: #333; background: #333; }
+.room-code { font-size: 0.75rem; color: var(--text-dim); padding: 4px 12px; border-radius: 999px; background: var(--bg-card); border: 1px solid var(--border); cursor: pointer; transition: var(--transition); white-space: nowrap; }
+.room-code:hover { border-color: var(--accent); color: var(--accent-light); }
+.board-wrapper { position: relative; margin-bottom: 8px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.5); line-height: 0; }
+canvas#board { display: block; cursor: pointer; touch-action: none; width: 100%; height: auto; }
+.controls { display: flex; gap: 10px; margin-bottom: 8px; }
+.controls .btn { padding: 10px 18px; font-size: 0.85rem; min-height: 40px; }
+.game-status { font-size: 0.95rem; font-weight: 600; min-height: 1.4em; text-align: center; color: var(--accent-light); margin-bottom: 8px; }
+.overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(10,10,11,0.88); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.overlay-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 36px 28px; text-align: center; max-width: 360px; width: 88%; animation: popIn 0.3s ease; }
+@keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.overlay-content h2 { font-size: 1.5rem; margin-bottom: 6px; }
+.overlay-content p { color: var(--text-dim); margin-bottom: 24px; font-size: 0.9rem; }
+.overlay-content .btns { display: flex; gap: 10px; justify-content: center; }
+@media (max-width: 400px) { .lobby { padding: 30px 16px; } .lobby h2 { font-size: 1.5rem; } .status-bar { gap: 6px; } .player-info { padding: 5px 8px; font-size: 0.8rem; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="back">&larr; Home</a>
+  <h1>Chinese Chess</h1>
+  <span style="width:48px"></span>
+</div>
+
+<div class="lobby" id="lobby">
+  <h2>中国象棋</h2>
+  <p class="desc">Choose a mode to start playing</p>
+  <div class="lobby-btns">
+    <button class="btn primary" onclick="startLocal()">Local Play (同设备对战)</button>
+    <button class="btn" onclick="showCreateRoom()">Create Room (创建房间)</button>
+    <div class="join-row">
+      <input id="roomInput" type="text" placeholder="Room Code (6 chars)" maxlength="6" inputmode="text" autocomplete="off">
+      <button class="btn" onclick="joinRoom()">Join</button>
+    </div>
+  </div>
+</div>
+
+<div class="game-screen" id="gameScreen">
+  <div class="status-bar">
+    <div class="player-info active" id="redInfo">
+      <span class="stone-icon red"></span>
+      <span id="redName">Red</span>
+    </div>
+    <div class="room-code" id="roomCode" style="display:none" onclick="copyRoomCode()" title="Click to copy"></div>
+    <div class="player-info" id="blackInfo">
+      <span class="stone-icon black"></span>
+      <span id="blackName">Black</span>
+    </div>
+  </div>
+  <div class="board-wrapper" id="boardWrapper">
+    <canvas id="board"></canvas>
+  </div>
+  <div class="game-status" id="gameStatus">Red's turn</div>
+  <div class="controls">
+    <button class="btn" onclick="restartGame()">Restart</button>
+    <button class="btn" onclick="backToLobby()">Back to Lobby</button>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay">
+  <div class="overlay-content">
+    <h2 id="winTitle"></h2>
+    <p id="winDesc"></p>
+    <div class="btns">
+      <button class="btn primary" onclick="restartGame();closeOverlay()">Play Again</button>
+      <button class="btn" onclick="backToLobby();closeOverlay()">Lobby</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const COLS = 9, ROWS = 10;
+const RED = 1, BLACK = -1;
+const PIECE_CHARS = { 1:'帅', 2:'仕', 3:'相', 4:'马', 5:'车', 6:'炮', 7:'兵', '-1':'将', '-2':'士', '-3':'象', '-4':'马', '-5':'车', '-6':'炮', '-7':'卒' };
+const INIT_BOARD = [
+  [-5,-4,-3,-2,-1,-2,-3,-4,-5],
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [ 0,-6, 0, 0, 0, 0, 0,-6, 0],
+  [-7, 0,-7, 0,-7, 0,-7, 0,-7],
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [ 7, 0, 7, 0, 7, 0, 7, 0, 7],
+  [ 0, 6, 0, 0, 0, 0, 0, 6, 0],
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [ 5, 4, 3, 2, 1, 2, 3, 4, 5]
+];
+
+let board, turn, gameOver, mode, myColor, selected, validMoves, lastMove;
+let peer, conn, myPeerId;
+
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+let cellSize, pad, dpr, canvasW, canvasH;
+
+function calcSizes() {
+  dpr = window.devicePixelRatio || 1;
+  const wrapper = document.getElementById('boardWrapper');
+  const maxW = Math.min(wrapper.parentElement.clientWidth - 16, 500);
+  const padRatio = 0.06;
+  pad = Math.round(maxW * padRatio);
+  cellSize = (maxW - pad * 2) / (COLS - 1);
+  canvasW = cellSize * (COLS - 1) + pad * 2;
+  canvasH = cellSize * (ROWS - 1) + pad * 2;
+  canvas.width = canvasW * dpr;
+  canvas.height = canvasH * dpr;
+  canvas.style.width = canvasW + 'px';
+  canvas.style.height = canvasH + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function initBoard() {
+  board = INIT_BOARD.map(r => [...r]);
+  turn = RED; gameOver = false; selected = null; validMoves = []; lastMove = null;
+  calcSizes(); updateStatus(); drawBoard();
+}
+
+function drawBoard() {
+  const w = canvasW, h = canvasH;
+  ctx.fillStyle = '#DEB887';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 1.5;
+  for (let r = 0; r < ROWS; r++) {
+    ctx.beginPath(); ctx.moveTo(pad, pad + r * cellSize); ctx.lineTo(pad + (COLS-1) * cellSize, pad + r * cellSize); ctx.stroke();
+  }
+  for (let c = 0; c < COLS; c++) {
+    ctx.beginPath(); ctx.moveTo(pad + c * cellSize, pad); ctx.lineTo(pad + c * cellSize, pad + (ROWS-1) * cellSize); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 2.5;
+  const bx = pad - cellSize * 0.05, by = pad - cellSize * 0.05;
+  const bw = (COLS-1) * cellSize + cellSize * 0.1, bh = (ROWS-1) * cellSize + cellSize * 0.1;
+  ctx.strokeRect(bx, by, bw, bh);
+
+  const d = cellSize * 0.05;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad + 3*cellSize - d, pad - d); ctx.lineTo(pad + 5*cellSize + d, pad + 2*cellSize + d); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad + 5*cellSize + d, pad - d); ctx.lineTo(pad + 3*cellSize - d, pad + 2*cellSize + d); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad + 3*cellSize - d, pad + 7*cellSize - d); ctx.lineTo(pad + 5*cellSize + d, pad + 9*cellSize + d); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad + 5*cellSize + d, pad + 7*cellSize - d); ctx.lineTo(pad + 3*cellSize - d, pad + 9*cellSize + d); ctx.stroke();
+
+  ctx.fillStyle = '#5a3a1a'; ctx.font = `bold ${cellSize * 0.38}px 'KaiTi', 'STKaiti', 'SimSun', serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const riverY = pad + 4.5 * cellSize;
+  ctx.fillText('楚 河', pad + 2 * cellSize, riverY);
+  ctx.fillText('漢 界', pad + 6 * cellSize, riverY);
+
+  const starPts = [[2,1],[2,7],[7,1],[7,7]];
+  for (const [sr, sc] of starPts) {
+    const sx = pad + sc * cellSize, sy = pad + sr * cellSize;
+    const len = cellSize * 0.18, gap = cellSize * 0.08;
+    const o = cellSize * 0.12;
+    ctx.lineWidth = 1.2;
+    const drawCorner = (dx, dy) => {
+      ctx.beginPath(); ctx.moveTo(sx + dx*(gap), sy + dy*(gap+o)); ctx.lineTo(sx + dx*(gap), sy + dy*gap); ctx.lineTo(sx + dx*(gap+o), sy + dy*gap); ctx.stroke();
+    };
+    if (sc > 0) { drawCorner(-1, -1); drawCorner(-1, 1); }
+    if (sc < 8) { drawCorner(1, -1); drawCorner(1, 1); }
+  }
+
+  if (validMoves.length > 0 && selected) {
+    for (const [mr, mc] of validMoves) {
+      const mx = pad + mc * cellSize, my = pad + mr * cellSize;
+      ctx.beginPath(); ctx.arc(mx, my, cellSize * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = board[mr][mc] !== 0 ? 'rgba(220,38,38,0.5)' : 'rgba(99,102,241,0.4)';
+      ctx.fill();
+    }
+  }
+
+  if (lastMove) {
+    const [fr, fc, tr, tc] = lastMove;
+    ctx.strokeStyle = 'rgba(99,102,241,0.7)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(pad + fc*cellSize, pad + fr*cellSize, cellSize*0.44, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(pad + tc*cellSize, pad + tr*cellSize, cellSize*0.44, 0, Math.PI*2); ctx.stroke();
+  }
+
+  if (selected) {
+    const sx = pad + selected[1]*cellSize, sy = pad + selected[0]*cellSize;
+    ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(sx, sy, cellSize*0.44, 0, Math.PI*2); ctx.stroke();
+  }
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] !== 0) drawPiece(r, c, board[r][c]);
+    }
+  }
+}
+
+function drawPiece(r, c, piece) {
+  const x = pad + c * cellSize, y = pad + r * cellSize;
+  const radius = cellSize * 0.42;
+  const isRed = piece > 0;
+
+  const grad = ctx.createRadialGradient(x - radius*0.2, y - radius*0.2, radius*0.1, x, y, radius);
+  grad.addColorStop(0, '#f5e6c8'); grad.addColorStop(1, '#d4b896');
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2);
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.strokeStyle = isRed ? '#b22222' : '#2a2a2a'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x, y, radius - 3, 0, Math.PI*2); ctx.lineWidth = 1; ctx.stroke();
+
+  const char = PIECE_CHARS[piece];
+  ctx.fillStyle = isRed ? '#b22222' : '#1a1a1a';
+  ctx.font = `bold ${cellSize * 0.42}px 'KaiTi', 'STKaiti', 'SimSun', serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(char, x, y + 1);
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  let cx, cy;
+  if (e.changedTouches && e.changedTouches.length > 0) { cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY; }
+  else if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+  else { cx = e.clientX; cy = e.clientY; }
+  const mx = (cx - rect.left) * (canvasW / rect.width);
+  const my = (cy - rect.top) * (canvasH / rect.height);
+  const c = Math.round((mx - pad) / cellSize);
+  const r = Math.round((my - pad) / cellSize);
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
+  const dx = mx - (pad + c * cellSize), dy = my - (pad + r * cellSize);
+  if (dx*dx + dy*dy > (cellSize*0.52)*(cellSize*0.52)) return null;
+  return [r, c];
+}
+
+function inBoard(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
+function colorOf(p) { return p > 0 ? RED : p < 0 ? BLACK : 0; }
+function inPalace(r, c, color) { return c >= 3 && c <= 5 && (color === RED ? (r >= 7 && r <= 9) : (r >= 0 && r <= 2)); }
+function onOwnSide(r, color) { return color === RED ? r >= 5 : r <= 4; }
+
+function getRawMoves(r, c, b) {
+  const piece = b[r][c];
+  if (piece === 0) return [];
+  const color = colorOf(piece);
+  const type = Math.abs(piece);
+  const moves = [];
+
+  const addIf = (nr, nc) => {
+    if (!inBoard(nr, nc)) return false;
+    if (colorOf(b[nr][nc]) === color) return false;
+    moves.push([nr, nc]); return true;
+  };
+
+  if (type === 1) {
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    for (const [dr,dc] of dirs) {
+      const nr = r+dr, nc = c+dc;
+      if (inPalace(nr, nc, color)) addIf(nr, nc);
+    }
+  } else if (type === 2) {
+    const dirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
+    for (const [dr,dc] of dirs) {
+      const nr = r+dr, nc = c+dc;
+      if (inPalace(nr, nc, color)) addIf(nr, nc);
+    }
+  } else if (type === 3) {
+    const dirs = [[-2,-2],[-2,2],[2,-2],[2,2]];
+    for (const [dr,dc] of dirs) {
+      const nr = r+dr, nc = c+dc;
+      const er = r+dr/2, ec = c+dc/2;
+      if (inBoard(nr, nc) && onOwnSide(nr, color) && b[er][ec] === 0) addIf(nr, nc);
+    }
+  } else if (type === 4) {
+    const legs = [[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],[-1,-2,0,-1],[-1,2,0,1],[1,-2,0,-1],[1,2,0,1]];
+    for (const [dr,dc,lr,lc] of legs) {
+      const nr = r+dr, nc = c+dc, legR = r+lr, legC = c+lc;
+      if (inBoard(nr, nc) && b[legR][legC] === 0) addIf(nr, nc);
+    }
+  } else if (type === 5) {
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    for (const [dr,dc] of dirs) {
+      let nr = r+dr, nc = c+dc;
+      while (inBoard(nr, nc)) {
+        if (b[nr][nc] === 0) { moves.push([nr, nc]); }
+        else { if (colorOf(b[nr][nc]) !== color) moves.push([nr, nc]); break; }
+        nr += dr; nc += dc;
+      }
+    }
+  } else if (type === 6) {
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    for (const [dr,dc] of dirs) {
+      let nr = r+dr, nc = c+dc, jumped = false;
+      while (inBoard(nr, nc)) {
+        if (!jumped) {
+          if (b[nr][nc] === 0) moves.push([nr, nc]);
+          else jumped = true;
+        } else {
+          if (b[nr][nc] !== 0) {
+            if (colorOf(b[nr][nc]) !== color) moves.push([nr, nc]);
+            break;
+          }
+        }
+        nr += dr; nc += dc;
+      }
+    }
+  } else if (type === 7) {
+    const fwd = color === RED ? -1 : 1;
+    const crossed = !onOwnSide(r, color);
+    addIf(r + fwd, c);
+    if (crossed) { addIf(r, c - 1); addIf(r, c + 1); }
+  }
+  return moves;
+}
+
+function findGeneral(b, color) {
+  const target = color === RED ? 1 : -1;
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (b[r][c] === target) return [r, c];
+  return null;
+}
+
+function isInCheck(b, color) {
+  const gen = findGeneral(b, color);
+  if (!gen) return true;
+  const opp = color === RED ? BLACK : RED;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (colorOf(b[r][c]) === opp) {
+        const moves = getRawMoves(r, c, b);
+        for (const [mr, mc] of moves) {
+          if (mr === gen[0] && mc === gen[1]) return true;
+        }
+      }
+    }
+  }
+  const oppGen = findGeneral(b, opp);
+  if (oppGen && gen[1] === oppGen[1]) {
+    let blocked = false;
+    const minR = Math.min(gen[0], oppGen[0]), maxR = Math.max(gen[0], oppGen[0]);
+    for (let r = minR + 1; r < maxR; r++) {
+      if (b[r][gen[1]] !== 0) { blocked = true; break; }
+    }
+    if (!blocked) return true;
+  }
+  return false;
+}
+
+function getValidMoves(r, c) {
+  const raw = getRawMoves(r, c, board);
+  const color = colorOf(board[r][c]);
+  const valid = [];
+  for (const [mr, mc] of raw) {
+    const saved = board[mr][mc];
+    board[mr][mc] = board[r][c]; board[r][c] = 0;
+    if (!isInCheck(board, color)) valid.push([mr, mc]);
+    board[r][c] = board[mr][mc]; board[mr][mc] = saved;
+  }
+  return valid;
+}
+
+function getAllMoves(color) {
+  const all = [];
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (colorOf(board[r][c]) === color) {
+        const moves = getValidMoves(r, c);
+        for (const m of moves) all.push({ from: [r,c], to: m });
+      }
+  return all;
+}
+
+function handleClick(e) {
+  if (gameOver) return;
+  if (mode !== 'local' && turn !== myColor) return;
+  const pos = getPos(e);
+  if (!pos) return;
+  const [r, c] = pos;
+
+  if (selected) {
+    const isValid = validMoves.some(([mr,mc]) => mr === r && mc === c);
+    if (isValid) {
+      const [fr, fc] = selected;
+      selected = null; validMoves = [];
+      makeMove(fr, fc, r, c, true);
+      return;
+    }
+  }
+
+  if (board[r][c] !== 0 && colorOf(board[r][c]) === turn) {
+    selected = [r, c];
+    validMoves = getValidMoves(r, c);
+  } else {
+    selected = null; validMoves = [];
+  }
+  drawBoard();
+}
+
+canvas.addEventListener('click', handleClick);
+canvas.addEventListener('touchend', (e) => { e.preventDefault(); handleClick(e); }, { passive: false });
+
+function makeMove(fr, fc, tr, tc, sendOnline) {
+  const piece = board[fr][fc];
+  board[tr][tc] = piece; board[fr][fc] = 0;
+  lastMove = [fr, fc, tr, tc];
+  turn = turn === RED ? BLACK : RED;
+  selected = null; validMoves = [];
+  drawBoard(); updateStatus();
+
+  if (sendOnline && mode !== 'local' && conn && conn.open) {
+    conn.send({ type:'move', fr, fc, tr, tc });
+  }
+
+  checkGameEnd();
+}
+
+function checkGameEnd() {
+  const moves = getAllMoves(turn);
+  if (moves.length === 0) {
+    gameOver = true;
+    const winner = turn === RED ? 'Black' : 'Red';
+    const reason = isInCheck(board, turn) ? 'Checkmate!' : 'Stalemate!';
+    setTimeout(() => showWin(winner, reason), 400);
+  }
+}
+
+function updateStatus() {
+  const s = document.getElementById('gameStatus');
+  const rInfo = document.getElementById('redInfo');
+  const bInfo = document.getElementById('blackInfo');
+  rInfo.classList.toggle('active', turn === RED);
+  bInfo.classList.toggle('active', turn === BLACK);
+  if (gameOver) return;
+  const name = turn === RED ? 'Red' : 'Black';
+  if (mode !== 'local' && turn !== myColor) {
+    s.textContent = "Opponent's turn...";
+  } else {
+    s.textContent = name + "'s turn" + (isInCheck(board, turn) ? ' (Check!)' : '');
+  }
+}
+
+function showWin(winner, reason) {
+  document.getElementById('winTitle').textContent = winner + ' Wins!';
+  document.getElementById('winDesc').textContent = reason;
+  document.getElementById('winOverlay').classList.add('active');
+}
+function closeOverlay() { document.getElementById('winOverlay').classList.remove('active'); }
+function showGame() { document.getElementById('lobby').style.display = 'none'; document.getElementById('gameScreen').classList.add('active'); }
+
+function startLocal() {
+  mode = 'local'; myColor = RED;
+  document.getElementById('redName').textContent = 'Player 1';
+  document.getElementById('blackName').textContent = 'Player 2';
+  document.getElementById('roomCode').style.display = 'none';
+  showGame(); initBoard();
+}
+
+function genRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = ''; for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function showCreateRoom() {
+  mode = 'host'; myColor = RED;
+  document.getElementById('redName').textContent = 'You (Host)';
+  document.getElementById('blackName').textContent = 'Waiting...';
+  document.getElementById('gameStatus').textContent = 'Creating room...';
+  const roomCode = genRoomCode(); myPeerId = roomCode;
+  peer = new Peer(roomCode);
+  peer.on('open', () => {
+    document.getElementById('roomCode').textContent = 'Room: ' + roomCode;
+    document.getElementById('roomCode').style.display = 'block';
+    showGame(); initBoard();
+    document.getElementById('gameStatus').textContent = 'Waiting for opponent...';
+  });
+  peer.on('connection', (connection) => {
+    conn = connection;
+    conn.on('open', () => {
+      document.getElementById('blackName').textContent = 'Opponent';
+      document.getElementById('gameStatus').textContent = "Red's turn";
+    });
+    conn.on('data', handleData);
+    conn.on('close', () => { document.getElementById('gameStatus').textContent = 'Opponent disconnected'; gameOver = true; });
+  });
+  peer.on('error', (err) => {
+    if (err.type === 'unavailable-id') { peer.destroy(); showCreateRoom(); return; }
+    alert('Connection error: ' + err.type);
+  });
+}
+
+function joinRoom() {
+  const input = document.getElementById('roomInput');
+  const code = input.value.trim().toUpperCase();
+  if (!code || code.length !== 6) { input.style.borderColor = '#ef4444'; setTimeout(() => input.style.borderColor = '', 1500); return; }
+  mode = 'guest'; myColor = BLACK;
+  document.getElementById('redName').textContent = 'Opponent';
+  document.getElementById('blackName').textContent = 'You';
+  document.getElementById('roomCode').style.display = 'none';
+  peer = new Peer();
+  peer.on('open', () => {
+    document.getElementById('gameStatus').textContent = 'Connecting...';
+    conn = peer.connect(code, { reliable: true });
+    conn.on('open', () => { showGame(); initBoard(); document.getElementById('gameStatus').textContent = "Red's turn"; });
+    conn.on('data', handleData);
+    conn.on('close', () => { document.getElementById('gameStatus').textContent = 'Opponent disconnected'; gameOver = true; });
+    conn.on('error', () => { document.getElementById('gameStatus').textContent = 'Connection failed. Check room code.'; });
+  });
+  peer.on('error', (err) => { alert('Cannot connect to room. Check the code and try again.'); });
+}
+
+function handleData(data) {
+  if (data.type === 'move') {
+    makeMove(data.fr, data.fc, data.tr, data.tc, false);
+  } else if (data.type === 'restart') {
+    initBoard();
+  }
+}
+
+function copyRoomCode() {
+  if (!myPeerId) return;
+  const done = () => { const el = document.getElementById('roomCode'); el.textContent = 'Copied!'; setTimeout(() => el.textContent = 'Room: ' + myPeerId, 1200); };
+  if (navigator.clipboard) navigator.clipboard.writeText(myPeerId).then(done);
+  else { const ta = document.createElement('textarea'); ta.value = myPeerId; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
+}
+
+function restartGame() { initBoard(); closeOverlay(); if (conn && conn.open) conn.send({ type: 'restart' }); }
+
+function backToLobby() {
+  closeOverlay();
+  if (conn) { conn.close(); conn = null; }
+  if (peer) { peer.destroy(); peer = null; }
+  document.getElementById('lobby').style.display = 'flex';
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('roomInput').value = '';
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('gameScreen').classList.contains('active')) {
+    calcSizes(); drawBoard();
+  }
+});
+</script>
+</body>
+</html>
