@@ -204,15 +204,6 @@ function drawBoard() {
     if (sc < 8) { drawCorner(1, -1); drawCorner(1, 1); }
   }
 
-  if (validMoves.length > 0 && selected) {
-    for (const [mr, mc] of validMoves) {
-      const mx = pad + mc * cellSize, my = pad + mr * cellSize;
-      ctx.beginPath(); ctx.arc(mx, my, cellSize * 0.12, 0, Math.PI * 2);
-      ctx.fillStyle = board[mr][mc] !== 0 ? 'rgba(220,38,38,0.5)' : 'rgba(99,102,241,0.4)';
-      ctx.fill();
-    }
-  }
-
   if (lastMove) {
     const [fr, fc, tr, tc] = lastMove;
     ctx.strokeStyle = 'rgba(99,102,241,0.7)'; ctx.lineWidth = 2.5;
@@ -222,13 +213,29 @@ function drawBoard() {
 
   if (selected) {
     const sx = pad + selected[1]*cellSize, sy = pad + selected[0]*cellSize;
+    ctx.fillStyle = 'rgba(99,102,241,0.2)';
+    ctx.beginPath(); ctx.arc(sx, sy, cellSize*0.46, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(sx, sy, cellSize*0.44, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx, sy, cellSize*0.46, 0, Math.PI*2); ctx.stroke();
   }
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (board[r][c] !== 0) drawPiece(r, c, board[r][c]);
+    }
+  }
+
+  if (validMoves.length > 0 && selected) {
+    for (const [mr, mc] of validMoves) {
+      const mx = pad + mc * cellSize, my = pad + mr * cellSize;
+      if (board[mr][mc] !== 0) {
+        ctx.strokeStyle = 'rgba(220,38,38,0.8)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(mx, my, cellSize*0.46, 0, Math.PI*2); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(mx, my, cellSize*0.15, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(99,102,241,0.6)';
+        ctx.fill();
+      }
     }
   }
 }
@@ -427,6 +434,12 @@ function handleClick(e) {
   if (board[r][c] !== 0 && colorOf(board[r][c]) === turn) {
     selected = [r, c];
     validMoves = getValidMoves(r, c);
+    if (validMoves.length === 0) {
+      const name = turn === RED ? 'Red' : 'Black';
+      document.getElementById('gameStatus').textContent = name + ': this piece has no valid moves';
+    } else {
+      updateStatus();
+    }
   } else {
     selected = null; validMoves = [];
   }
