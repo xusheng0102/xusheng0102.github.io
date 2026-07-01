@@ -96,6 +96,7 @@ canvas#board { display: block; cursor: pointer; touch-action: none; width: 100%;
   </div>
   <div class="game-status" id="gameStatus">Red's turn</div>
   <div class="controls">
+    <button class="btn" onclick="undoMove(true)">Undo</button>
     <button class="btn" onclick="restartGame()">Restart</button>
     <button class="btn" onclick="backToLobby()">Back to Lobby</button>
   </div>
@@ -130,7 +131,7 @@ const INIT_BOARD = [
   [ 5, 4, 3, 2, 1, 2, 3, 4, 5]
 ];
 
-let board, turn, gameOver, mode, myColor, selected, validMoves, lastMove;
+let board, turn, gameOver, mode, myColor, selected, validMoves, lastMove, moveHistory;
 let peer, conn, myPeerId;
 
 const canvas = document.getElementById('board');
@@ -155,7 +156,7 @@ function calcSizes() {
 
 function initBoard() {
   board = INIT_BOARD.map(r => [...r]);
-  turn = RED; gameOver = false; selected = null; validMoves = []; lastMove = null;
+  turn = RED; gameOver = false; selected = null; validMoves = []; lastMove = null; moveHistory = [];
   calcSizes(); updateStatus(); drawBoard();
 }
 
@@ -437,7 +438,9 @@ canvas.addEventListener('touchend', (e) => { e.preventDefault(); handleClick(e);
 
 function makeMove(fr, fc, tr, tc, sendOnline) {
   const piece = board[fr][fc];
+  const captured = board[tr][tc];
   board[tr][tc] = piece; board[fr][fc] = 0;
+  moveHistory.push({ fr, fc, tr, tc, captured, prevTurn: turn === RED ? BLACK : RED });
   lastMove = [fr, fc, tr, tc];
   turn = turn === RED ? BLACK : RED;
   selected = null; validMoves = [];
@@ -448,6 +451,21 @@ function makeMove(fr, fc, tr, tc, sendOnline) {
   }
 
   checkGameEnd();
+}
+
+function undoMove(sendOnline) {
+  if (moveHistory.length === 0 || gameOver) return;
+  const last = moveHistory.pop();
+  board[last.fr][last.fc] = board[last.tr][last.tc];
+  board[last.tr][last.tc] = last.captured;
+  turn = last.prevTurn;
+  lastMove = moveHistory.length > 0 ? [moveHistory[moveHistory.length-1].fr, moveHistory[moveHistory.length-1].fc, moveHistory[moveHistory.length-1].tr, moveHistory[moveHistory.length-1].tc] : null;
+  selected = null; validMoves = [];
+  drawBoard(); updateStatus();
+
+  if (sendOnline && mode !== 'local' && conn && conn.open) {
+    conn.send({ type: 'undo' });
+  }
 }
 
 function checkGameEnd() {
@@ -548,6 +566,8 @@ function joinRoom() {
 function handleData(data) {
   if (data.type === 'move') {
     makeMove(data.fr, data.fc, data.tr, data.tc, false);
+  } else if (data.type === 'undo') {
+    undoMove(false);
   } else if (data.type === 'restart') {
     initBoard();
   }
