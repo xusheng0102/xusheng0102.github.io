@@ -439,8 +439,9 @@ canvas.addEventListener('touchend', (e) => { e.preventDefault(); handleClick(e);
 function makeMove(fr, fc, tr, tc, sendOnline) {
   const piece = board[fr][fc];
   const captured = board[tr][tc];
+  const prevTurn = turn;
   board[tr][tc] = piece; board[fr][fc] = 0;
-  moveHistory.push({ fr, fc, tr, tc, captured, prevTurn: turn === RED ? BLACK : RED });
+  moveHistory.push({ fr, fc, tr, tc, captured, prevTurn });
   lastMove = [fr, fc, tr, tc];
   turn = turn === RED ? BLACK : RED;
   selected = null; validMoves = [];
